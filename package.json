@@ -1,0 +1,24 @@
+{
+  "name": "discordauth",
+  "version": "1.0.0",
+  "description": "DiscordAuth",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dangleworks/DiscordAuth.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Dangleworks/DiscordAuth/issues"
+  },
+  "homepage": "https://github.com/Dangleworks/DiscordAuth#readme",
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "express": "^4.17.1",
+    "sqlite3": "^5.0.2"
+  }
+}

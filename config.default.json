@@ -1,0 +1,9 @@
+{
+    "discord": {
+        "token": "",
+        "prefix": "^"
+    },
+    "stormworks": {
+        "listen_port": "9006"
+    }
+}
