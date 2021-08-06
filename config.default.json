@@ -1,7 +1,8 @@
 {
     "discord": {
         "token": "",
-        "prefix": "^"
+        "prefix": "^",
+        "channel_id": ""
     },
     "stormworks": {
         "listen_port": "9006"

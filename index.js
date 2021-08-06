@@ -25,10 +25,21 @@ app.get("/getcode", async (req, res) => {
         return res.sendStatus(400).end();
     }
     db.get(`SELECT * FROM verified WHERE steam_id = '${req.query.sid}'`, (err, row) => {
-        if (row) return res.send("false").end();
-        if (codes[req.query.sid]) return res.send(codes[req.query.sid].toString()).end();
+        if (row) return res.send({
+            steam_id: req.query.sid,
+            status: false
+        }).end();
+        if (codes[req.query.sid]) return res.send({
+            code: codes[req.query.sid].toString(),
+            steam_id: req.query.sid,
+            status: true
+        }).end();
         codes[req.query.sid] = Math.floor(100000 + Math.random() * 900000);
-        res.send(codes[req.query.sid].toString()).end();
+        res.send({
+            code: codes[req.query.sid].toString(),
+            steam_id: req.query.sid,
+            status: true
+        }).end();
         setTimeout(() => {
             codes[req.query.sid] = undefined;
         }, 180000);
@@ -40,8 +51,23 @@ app.get("/check", async (req, res) => {
         return res.sendStatus(400).end();
     }
     db.get(`SELECT * FROM verified WHERE steam_id = '${req.query.sid}'`, (err, row) => {
-        if (row) return res.send({steam_id: row.steam_id.toString(), discord_id: row.discord_id.toString(), status: true}).end();
-        res.send({steam_id : req.query.sid,status: false}).end();
+        if (row) {
+            bot.channels.cache.get(config.discord.channel_id).guild.members.fetch(row.discord_id).then((mem) => {
+                mem.roles.cache.find(role => role.name === "@everyone")
+                return res.send({steam_id: row.steam_id.toString(), discord_id: row.discord_id.toString(), status: true}).end();
+            }).catch((err) => {
+                db.exec(`DELETE FROM verified WHERE discord_id = ${row.discord_id}`);
+                    return res.send({
+                        steam_id: req.query.sid,
+                        status: false
+                }).end();
+            })
+        } else {
+            res.send({
+                steam_id: req.query.sid,
+                status: false
+            }).end();
+        }
     })
 })
 
@@ -53,7 +79,7 @@ bot.on('message', (msg) => {
         switch (cmd) {
             case "verify":
                 if (!args[0]) return msg.channel.send(`Error: No code provided\n\`${prefix}verify <code>\``);
-                if (args[0].length > 6 || !args[0].match(/\d{6}/m)) return msg.channel.send(`Error: Invalid code provided\nUse \`?verify\` in game to get your code!`);                
+                if (args[0].length > 6 || !args[0].match(/\d{6}/m)) return msg.channel.send(`Error: Invalid code provided\nUse \`?verify\` in game to get your code!`);
                 db.get(`SELECT * FROM verified WHERE discord_id = '${msg.author.id}'`, (err, row) => {
                     if (row) return msg.channel.send("You're already verified under another account!");
                     if (!check(codes, args[0])) return msg.channel.send(`Error: Invalid code provided\nUse \`?verify\` in game to get your code!`);
@@ -91,6 +117,6 @@ const check = (input, what) => {
         if (v == what) {
             return k
         }
-        return false
     }
+    return false
 }
