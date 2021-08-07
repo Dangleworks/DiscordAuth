@@ -88,6 +88,7 @@ bot.on('message', (msg) => {
                     tmp.finalize((err) => {
                         if (err) console.log(err);
                         codes[check(codes, args[0])] = undefined;
+                        if(config.discord.verified_role_id) msg.member.roles.add(config.discord.verified_role_id);
                         msg.channel.send("Verified!");
                     });
                 });
