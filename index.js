@@ -72,24 +72,48 @@ app.get("/check", async (req, res) => {
 })
 
 bot.on('message', (msg) => {
+    if(msg.author.id === bot.user.id || msg.author.bot) return
     const prefix = config.discord.prefix;
     const args = msg.content.slice(prefix.length).trim().split(/ +/g);
     const cmd = args.shift().toLowerCase();
     if (msg.content.toLowerCase().startsWith(prefix)) {
+        if(msg.channel.type === "dm") return msg.channel.send("Please run commands in the Discord server!")
         switch (cmd) {
             case "verify":
-                if (!args[0]) return msg.channel.send(`Error: No code provided\n\`${prefix}verify <code>\``);
-                if (args[0].length > 6 || !args[0].match(/\d{6}/m)) return msg.channel.send(`Error: Invalid code provided\nUse \`?verify\` in game to get your code!`);
                 db.get(`SELECT * FROM verified WHERE discord_id = '${msg.author.id}'`, (err, row) => {
-                    if (row) return msg.channel.send("You're already verified under another account!");
-                    if (!check(codes, args[0])) return msg.channel.send(`Error: Invalid code provided\nUse \`?verify\` in game to get your code!`);
+                    if (row) return msg.channel.send("You're already verified under another account!").then((msg1) => {
+                        setTimeout(() => {
+                            msg.delete();
+                            msg1.delete();
+                        }, 10000)
+                    });
+                    if (!args[0]) return msg.channel.send(`Error: Invalid code provided\nUse \`?verify\` in game to get your code!`).then((msg1) => {
+                        setTimeout(() => {
+                            msg.delete();
+                            msg1.delete();
+                        }, 10000)
+                    });
+                    if (args[0].length > 6 || !args[0].match(/\d{6}/m)) return msg.channel.send(`Error: Invalid code provided\nUse \`?verify\` in game to get your code!`).then((msg1) => {
+                        setTimeout(() => {
+                            msg.delete();
+                            msg1.delete();
+                        }, 10000)
+                    });
+                    if (!check(codes, args[0])) return msg.channel.send(`Error: Invalid code provided\nUse \`?verify\` in game to get your code!`).then((msg1) => {
+                        setTimeout(() => {
+                            msg.delete();
+                            msg1.delete();
+                        }, 10000)
+                    });
                     tmp = db.prepare("INSERT INTO verified VALUES (?,?)");
                     tmp.run(check(codes, args[0]), msg.author.id.toString());
                     tmp.finalize((err) => {
                         if (err) console.log(err);
                         codes[check(codes, args[0])] = undefined;
                         if(config.discord.verified_role_id) msg.member.roles.add(config.discord.verified_role_id);
-                        msg.channel.send("Verified!");
+                        msg.react("✅").then(() => {
+                            setTimeout(() => {msg.delete()}, 10000)
+                        })
                     });
                 });
                 break;
