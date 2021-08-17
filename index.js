@@ -114,8 +114,8 @@ bot.on('message', (msg) => {
 							msg1.delete();
 						}, 10000)
 					});
-					tmp = db.prepare("INSERT INTO verified VALUES (?,?)");
-					tmp.run(check(codes, args[0]), msg.author.id.toString());
+					tmp = db.prepare("INSERT INTO verified VALUES (?,?,?)");
+					tmp.run(check(codes, args[0]), msg.author.id.toString(),0);
 					tmp.finalize((err) => {
 						if (err) console.log(err);
 						codes[check(codes, args[0])] = undefined;
