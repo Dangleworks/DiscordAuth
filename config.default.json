@@ -6,6 +6,7 @@
         "verified_role_id": ""
     },
     "stormworks": {
-        "listen_port": "9006"
+        "listen_port": "9006",
+		"host": "0.0.0.0"
     }
 }

@@ -14,7 +14,7 @@ const bot = new Discord.Client();
 
 bot.on('ready', () => {
 	console.log(`Logged into Discord as ${bot.user.tag}`);
-	app.listen(config.stormworks.listen_port, "127.0.0.1", () => {
+	app.listen(config.stormworks.listen_port, config.stormworks.host, () => {
 		console.log('server started');
 	})
 })
